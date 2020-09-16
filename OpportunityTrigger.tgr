@@ -1,0 +1,50 @@
+/*
+	Who: Shankar Muthusami
+	On: 16-Sep-2020
+	Description: When an Opportunity stage has been changed to either won/lost respective fields no.of.OpportunityWon and no.of.OpportunityLost will be updated in parent Account record
+*/
+
+trigger OpportunityTrigger on Opportunity(after update, after insert){
+	
+	List<Account> lstAccount = new List<Account>();
+	Map<Id, Integer> mapAccount = new Map<Id, Account>();	
+
+	if(Trigger.isAfter){
+		if(Trigger.isUpdate){
+			
+			Map<Id, Opportunity> mapOpp = new Map<Id, Opportunity>();
+			List<Id> lstAccId = new List<Id>();
+			Boolean isStageChanged = false;
+			
+			//Fetching the related parent Account record Id and adding it into the list
+			
+			for(Id oppId: newMapOpp.keySet()){
+				
+				//This Trigger will execute only if StageName field gets changed
+				
+				if(newMapOpp.get(oppId).StageName != oldMapOpp.get(oppId).StageName){
+					if(isStageChanged==false) isStageChanged = true;					
+					Opportunity op = newMapOpp.get(oppId);
+					mapOpp.put(oppId, op);
+					lstAccId.push(op.AccountId);
+				}
+			}
+			
+			//This Trigger will execute only if StageName field gets changed
+			if(isStageChanged){
+				Map<Id, Account> mapAcc = new Map<Id, Account>([select Id, nWon__c, nLost__c from Account where Id IN :lstAccId]);
+				
+				for(Id oppId: mapOpp.keySet()){
+					Opportunity op = mapOpp.get(oppId);
+					
+					if(op.StageName == 'Closed Won')
+						mapAcc.get(op.AccountId).nWon__c++;
+					else if(op.StageName == 'Closed Lost')
+						mapAcc.get(op.AccountId).nLost__c++;
+					
+				}
+				update mapAcc;	
+			}	
+		}
+	}
+}

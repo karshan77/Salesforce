@@ -4,7 +4,7 @@
 	Problem statement:  To copy 'Amazon' custom metadata records to 'Flipkart' custom metadata in the org 'Retail'
 						For example we are having a Salesforce org named as Retail. In that retail org we are having custom metadata 
 						named as 'Amazon' with some records having data Product name, price and type. We have to create new custom 
-						metadata named as 'Flipkart' and 'Flipkart' whould contains all the records available in 'Amazon' with same 
+						metadata named as 'Flipkart' and 'Flipkart' should contains all the records available in 'Amazon' with same 
 						custom fields as like 'Amazon' is having.
 	Notes: Only 50 records we can copy from 'Amazon' to 'Flipkart' custom metadata in the org 'Retail'
 */

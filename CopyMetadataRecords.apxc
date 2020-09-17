@@ -1,0 +1,48 @@
+/*
+	Who: Shankar Muthusami
+	On: 17-Sep-2020
+	Problem statement:  To copy 'Amazon' custom metadata records to 'Flipkart' custom metadata in the org 'Retail'
+						For example we are having a Salesforce org named as Retail. In that retail org we are having custom metadata 
+						named as 'Amazon' with some records having data Product name, price and type. We have to create new custom 
+						metadata named as 'Flipkart' and 'Flipkart' whould contains all the records available in 'Amazon' with same 
+						custom fields as like 'Amazon' is having.
+	Notes: Only 50 records we can copy from 'Amazon' to 'Flipkart' custom metadata in the org 'Retail'
+*/
+public class MetadataCloning implements Metadata.DeployCallback {
+
+     public void handleResult(Metadata.DeployResult result, Metadata.DeployCallbackContext context) {
+        if (result.status == Metadata.DeployStatus.Succeeded) {
+            System.debug(' success : '+ result);
+        } else {
+            System.debug(' fail : '+ result);
+        }
+    }
+    
+    public static void copyMetadata(){
+         
+			List<karshan77__Amazon__mdt> lstAmazonRecords = [select Id, DeveloperName, MasterLabel, NamespacePrefix, 
+														karshan77__Product_Price__c, karshan77__Product_Type__c from karshan77__Amazon__mdt];
+        
+			for(karshan77__Amazon__mdt amzRec: lstAmazonRecords){        
+                                
+                Metadata.CustomMetadata customMetadata =  new Metadata.CustomMetadata();
+                customMetadata.fullName = 'Flipkart.' + amzRec.DeveloperName;
+                customMetadata.label = amzRec.MasterLabel;                
+                
+                Metadata.CustomMetadataValue priceField = new Metadata.CustomMetadataValue();
+                priceField.field = 'karshan77__Product_Price__c';
+                priceField.value = amzRec.karshan77__Product_Price__c; 
+                customMetadata.values.add(priceField);
+                
+                Metadata.CustomMetadataValue typeField = new Metadata.CustomMetadataValue();
+                typeField.field = 'karshan77__Product_Type__c';
+                typeField.value = amzRec.karshan77__Product_Type__c; 
+                customMetadata.values.add(typeField);
+                
+                Metadata.DeployContainer mdContainer = new Metadata.DeployContainer();
+                mdContainer.addMetadata(customMetadata);
+                MetadataCloning callback = new MetadataCloning();
+                Id jobId = Metadata.Operations.enqueueDeployment(mdContainer, callback);
+			}
+    }
+}
